@@ -10,9 +10,9 @@ import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-public class KafkaMyProducer implements Closeable {
+public class KafkaMyProducer<T> implements Closeable {
 
-    private final KafkaProducer<String, String> producer;
+    private final KafkaProducer<String, T> producer;
 
     public KafkaMyProducer() {
         this.producer = new KafkaProducer<>(properties());
@@ -22,11 +22,11 @@ public class KafkaMyProducer implements Closeable {
         var properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
         return properties;
     }
 
-    public void send(String topic, String key, String value) throws ExecutionException, InterruptedException {
+    public void send(String topic, String key, T value) throws ExecutionException, InterruptedException {
         var record = new ProducerRecord<>(topic, key, value);
         Callback callback = (data, ex) -> {
             if (ex != null) {
